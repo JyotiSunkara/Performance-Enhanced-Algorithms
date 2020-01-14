@@ -101,18 +101,18 @@ The above is done to read multiple profile files, as created by Cachegrind, merg
 
  ## Common Options
 
- >## `--<cachename>=<size>,<associativity>,<line size>`
+ >### `--<cachename>=<size>,<associativity>,<line size>`
 
  Here `<cachename>` can be I1, D1 or L1 and this options is used to specify the size, associativity and line size of the cache level.
 
- >## `--cache-sim=no|yes [yes]`
+ >### `--cache-sim=no|yes [yes]`
 
  Enables or disables collection of cache access and miss counts.
 
- >## `-branch-sim=no|yes [no] `
+ >### `-branch-sim=no|yes [no] `
 
 Enables or disables collection of branch instruction and misprediction counts.By default this is disabled as it slows Cachegrind down by approximately 25%.
 
->## `--cachegrind-out-file=<file>`
+>### `--cachegrind-out-file=<file>`
 
 Write the profile data to `file` rather than to the default output file, `cachegrind.out.pid`
