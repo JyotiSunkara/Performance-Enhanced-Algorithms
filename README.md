@@ -72,3 +72,72 @@ Used to record events and analyse performance on existing thread IDs.
 >### `-d`
 
 Used to provide a ,more detailed performance analysis, consisting of time taken per event and so on.
+
+>## 2. `cachegrind`
+
+`cachegrind` simulates your program's interaction with the machine's cache hierarchy and (optionally) branch predictor. It tracks usage of the simulated first-level instruction and data caches to detect poor code interaction with this level of cache; and the last-level cache, whether that is a second- or third-level cache, in order to track access to main memory. As such, programs run with Cachegrind run twenty to one hundred times slower than when run normally. 
+
+## Installation (On Linux)   HAVE TO CHECK FOR THIS!
+
+```bash
+$ uname -r       ```5.0.0-37-generic```
+$ sudo apt install linux-tools-5.0.0-37-generic
+```
+Use the first command to obtain the kernel release, and fill it in the second command.
+
+## Usage
+
+To run Cachegrind, execute the following command, replacing 'program' with the program you wish to profile with Cachegrind:
+
+```bash 
+$ valgrind --tool=cachegrind program
+```
+
+The statistics that will be generated via this command are : 
+
+* First-level instruction cache reads (or instructions executed) and read misses, and last-level cache instruction read misses;
+* Data cache reads (or memory reads), read misses, and last-level cache data read misses;
+* Data cache writes (or memory writes), write misses, and last-level cache write misses;
+* Conditional branches executed and mispredicted; and
+* Indirect branches executed and mispredicted.
+
+Cachegrind then prints summary information about these statistics to the console, and writes more detailed profiling information to a file (cachegrind.out.pid by default, where pid is the process ID of the program on which you ran Cachegrind).
+This file can be further processed by the accompanying cg_annotate tool, like so:
+
+```bash
+$ cg_annotate cachegrind.out.pid
+```
+
+In order to compare the profile files created by Cachegrind and to see the difference in program performance before and after a change , the cg_diff command, is used as follows :
+
+```bash
+$ cg_diff <initial profile output file> <subsequent profile output file>
+```
+
+## Common subcommands 
+
+Cachegrind supports a number of options to focus its output. Some of the options available are: 
+
+>### `--I1`
+
+Specifies the size, associativity, and line size of the first-level instruction cache, separated by commas: --I1=size,associativity,line size
+
+>### `--D1`
+
+Specifies the size, associativity, and line size of the first-level data cache, separated by commas: --D1=size,associativity,line size
+
+>### `--LL`
+
+Specifies the size, associativity, and line size of the last-level cache, separated by commas: --LL=size,associativity,line size
+
+>### `--cache-sim`
+
+Enables or disables the collection of cache access and miss counts. The default value is yes (enabled). 
+
+>### `--branch-sim`
+
+Enables or disables the collection of branch instruction and misprediction counts. This is set to no (disabled) by default, since it slows Cachegrind by approximately 25 per-cent. 
+
+
+
+
