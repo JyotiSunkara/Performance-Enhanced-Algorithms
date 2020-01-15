@@ -27,117 +27,92 @@ Use the first command to obtain the kernel release, and fill it in the second co
 ## Common subcommands
 
 >### `stat`
-
 Used to run a command and obtain performance counter statistics on it.
 
 For example `perf stat ls` gives us:
 ~ Add image here ~
 
 >### `record`
-
 Used to run a command and gather a performance counter profile from it that is stored into perf.data file without displaying anything. 
 
 >### `report`
-
 Used to read the perf.data file present in the directory and display the performance profile onto the terminal.
 
 >### `list`
-
 Used to list all the symbolic even types analysed by the `perf` command such as cache misses, context swiitches, L1-dcache-loads and so on.
 
 >### `trace`
-
 Used to show the events associated with the target,initially syscalls, but other system events like pagefaults, task lifetime events, scheduling events and so on.
 
 ## Common options
 
 >### `-a`
-
 Used to obtain a system wide performance analysis from all CPUs
 
 >### `-e`
-
 Used to show only data/ performance with respect to specific syscalls or events like context switches.
 
-Used as `perf stat -e cs` to obtain context switch data.
+Used as `perf stat -e cs ls` to obtain context switch data about `ls`.
 
 >### `-p`
-
 Used to record events and analyse performance by supplying PIDs of the processes in a comma seperated list.
 
 >### `-t`
-
 Used to record events and analyse performance on existing thread IDs.
 
 >### `-d`
-
 Used to provide a ,more detailed performance analysis, consisting of time taken per event and so on.
 
 >## 2. `cachegrind`
 
-`cachegrind` simulates your program's interaction with the machine's cache hierarchy and (optionally) branch predictor. It tracks usage of the simulated first-level instruction and data caches to detect poor code interaction with this level of cache; and the last-level cache, whether that is a second- or third-level cache, in order to track access to main memory. As such, programs run with Cachegrind run twenty to one hundred times slower than when run normally. 
+`cachegrind` simulates how your program interacts with a machine's cache hierarchy and (optionally) branch predictor. It simulates a machine with independent first-level instruction and data caches (I1 and D1), backed by a unified second-level cache (L2). This exactly matches the configuration of many modern machines.
 
-## Installation (On Linux)   HAVE TO CHECK FOR THIS!
+However, some modern machines have three or four levels of cache. For these machines (in the cases where `cachegrind` can auto-detect the cache configuration) it simulates the first-level and last-level caches. The reason for this choice is that the last-level cache has the most influence on runtime, as it masks accesses to main memory. Furthermore, the L1 caches often have low associativity, so simulating them can detect cases where the code interacts badly with this cache.
 
-```bash
-$ uname -r       ```5.0.0-37-generic```
-$ sudo apt install linux-tools-5.0.0-37-generic
-```
-Use the first command to obtain the kernel release, and fill it in the second command.
+Therefore, `cachegrind` is a tool for doing cache simulations and annotating your source line-by-line with the number of cache misses. In particular, it records:
+
+*   L1 instruction cache reads and misses (I1)
+*   L1 data cache reads and read misses, writes and write misses (D1)
+*   L2 unified cache reads and read misses, writes and writes misses (LL)
 
 ## Usage
 
-To run Cachegrind, execute the following command, replacing 'program' with the program you wish to profile with Cachegrind:
-
-```bash 
-$ valgrind --tool=cachegrind program
+```bash
+$ valgrind --tool=cachegrind <program>
 ```
+ Cachegrind will slowly excecute the program and print summary cache statistics. It also collects line-by-line information in a file `cachegrind.out.pid`, where `pid` is the program's process id.
 
-The statistics that will be generated via this command are : 
-
-* First-level instruction cache reads (or instructions executed) and read misses, and last-level cache instruction read misses;
-* Data cache reads (or memory reads), read misses, and last-level cache data read misses;
-* Data cache writes (or memory writes), write misses, and last-level cache write misses;
-* Conditional branches executed and mispredicted; and
-* Indirect branches executed and mispredicted.
-
-Cachegrind then prints summary information about these statistics to the console, and writes more detailed profiling information to a file (cachegrind.out.pid by default, where pid is the process ID of the program on which you ran Cachegrind).
-This file can be further processed by the accompanying cg_annotate tool, like so:
+ ```bash
+$ cg_annotate <filename>
+```
+The above is done to generate a function-by-function summary, and possibly annotate source files.
 
 ```bash
-$ cg_annotate cachegrind.out.pid
+$ cg_merge -o outputfile <file1> <file2> <file3> ...
 ```
+The above is done to read multiple profile files, as created by Cachegrind, merges them together, and writes the results into another file in the same format.
 
-In order to compare the profile files created by Cachegrind and to see the difference in program performance before and after a change , the cg_diff command, is used as follows :
+ The merging functionality might be useful if you want to aggregate costs over multiple runs of the same program, or from a single parallel run with multiple instances of the same program.
 
-```bash
-$ cg_diff <initial profile output file> <subsequent profile output file>
-```
+ ```bash
+ cg_diff file1 file2
+ ```
+ cg_diff is a simple program which reads two profile files, as created by Cachegrind, finds the difference between them, and writes the results into another file in the same format.
 
-## Common subcommands 
+ ## Common Options
 
-Cachegrind supports a number of options to focus its output. Some of the options available are: 
+ >### `--<cachename>=<size>,<associativity>,<line size>`
 
->### `--I1`
+ Here `<cachename>` can be I1, D1 or L1 and this options is used to specify the size, associativity and line size of the cache level.
 
-Specifies the size, associativity, and line size of the first-level instruction cache, separated by commas: --I1=size,associativity,line size
+ >### `--cache-sim=no|yes [yes]`
 
->### `--D1`
+ Enables or disables collection of cache access and miss counts.
 
-Specifies the size, associativity, and line size of the first-level data cache, separated by commas: --D1=size,associativity,line size
+ >### `-branch-sim=no|yes [no] `
 
->### `--LL`
+Enables or disables collection of branch instruction and misprediction counts.By default this is disabled as it slows Cachegrind down by approximately 25%.
 
-Specifies the size, associativity, and line size of the last-level cache, separated by commas: --LL=size,associativity,line size
+>### `--cachegrind-out-file=<file>`
 
->### `--cache-sim`
-
-Enables or disables the collection of cache access and miss counts. The default value is yes (enabled). 
-
->### `--branch-sim`
-
-Enables or disables the collection of branch instruction and misprediction counts. This is set to no (disabled) by default, since it slows Cachegrind by approximately 25 per-cent. 
-
-
-
-
+Write the profile data to `file` rather than to the default output file, `cachegrind.out.pid`
