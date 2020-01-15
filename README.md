@@ -130,7 +130,7 @@ Enables or disables collection of branch instruction and misprediction counts.By
 
 Write the profile data to `file` rather than to the default output file, `cachegrind.out.pid`
 
->## 2. `clock_gettime()`
+>## 3. `clock_gettime()`
 
 POSIX is a standard for implementing and representing time sources. In contrast to the hardware clock, which is selected by the kernel and implemented across the system; the POSIX clock can be selected by each application, without affecting other applications in the system.
 
@@ -221,3 +221,44 @@ Thread-specific CPU-time clock.
 Functions such as clock_gettime() and gettimeofday() have a counterpart in the kernel, in the form of a system call. When a user process calls clock_gettime(), the corresponding C library (glibc) routine calls the sys_clock_gettime() system call, which performs the requested operation and then returns the result to the user process.
 However, this context switch from user application to kernel has a cost. Even though this cost is very low, if the operation is repeated thousands of times, the accumulated cost can have an impact on the overall performance of the application.
 To avoid the context switch to the kernel, thus making it faster to read the clock, support for the CLOCK_MONOTONIC_COARSE and CLOCK_REALTIME_COARSE POSIX clocks was created in the form of a VDSO library function. The _COARSE variants are faster to read and have a precision (also known as resolution) of one millisecond (ms).
+
+>## 3. `gprof`
+
+`gprof` produces an execution profile of C, Pascal, or Fortran77 programs. The effect of called routines is incorporated in the profile of each caller. The profile data is taken from the call graph profile file (`gmon.out` default) which is created by programs that are compiled with the `-pg` option of cc, pc, and f77. The `-pg` option also links in versions of the library routines that are compiled for profiling. Gprof reads the given object file (the default is `a.out`) and establishes the relation between its symbol table and the call graph profile from `gmon.out`.
+
+`gprof` calculates the amount of time spent in each routine. Next, these times are propagated along the edges of the *call graph*. Cycles are discovered, and calls into a cycle are made to share the time of the cycle.
+
+Several forms of output are available from the analysis such as: 
+
+* The *flat profile* shows how much time your program spent in each function, and how many times that function was called. If you simply want to know which functions burn most of the cycles, it is stated concisely here.
+
+* The *call graph* shows, for each function, which functions called it, which other functions it called, and how many times. There is also an estimate of how much time was spent in the subroutines of each function. This can suggest places where you might try to eliminate function calls that use a lot of time.
+
+* The *annotated source* listing is a copy of the program’s source code, labeled with the number of times each line of the program was execute
+
+## Usage
+
+1. Have profiling enabled while compiling the code, made possible by adding the `-pg` option in the compilation step.
+2. Execute the program code to produce the profiling data that will be stored as `gmon.out` in the current working directory.
+3. Run the gprof tool on the profiling data file, generated in the step above.
+
+## Common options
+
+>### `-a`
+Suppress the printing of statically (private) declared functions.
+
+>### `-b`
+Suppress verbose blurbs of text explaination in the generated profile.
+
+>### `-p`
+Print only flat profile of the excecuted program.
+
+Print information related to specific function in flat profile can be achieved by providing the function name along with the `-p` option.
+
+>### `-q`
+Print only call graph information of the excecuted program.
+
+
+
+
+
