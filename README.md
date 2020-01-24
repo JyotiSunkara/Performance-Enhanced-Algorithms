@@ -222,7 +222,7 @@ Functions such as clock_gettime() and gettimeofday() have a counterpart in the k
 However, this context switch from user application to kernel has a cost. Even though this cost is very low, if the operation is repeated thousands of times, the accumulated cost can have an impact on the overall performance of the application.
 To avoid the context switch to the kernel, thus making it faster to read the clock, support for the CLOCK_MONOTONIC_COARSE and CLOCK_REALTIME_COARSE POSIX clocks was created in the form of a VDSO library function. The _COARSE variants are faster to read and have a precision (also known as resolution) of one millisecond (ms).
 
->## 3. `gprof`
+>## 4. `gprof`
 
 `gprof` produces an execution profile of C, Pascal, or Fortran77 programs. The effect of called routines is incorporated in the profile of each caller. The profile data is taken from the call graph profile file (`gmon.out` default) which is created by programs that are compiled with the `-pg` option of cc, pc, and f77. The `-pg` option also links in versions of the library routines that are compiled for profiling. Gprof reads the given object file (the default is `a.out`) and establishes the relation between its symbol table and the call graph profile from `gmon.out`.
 
@@ -259,6 +259,82 @@ Print information related to specific function in flat profile can be achieved b
 Print only call graph information of the excecuted program.
 
 
+## Task 1
+
+## Optimisations Used
+
+*Time taken with no optimisation*: 8.2 seconds 
+
+1. Transpose of the second matrix.
+In order to improve the chances of getting cache hit, as the neighbouring elements will now be accesed versus accesing different columns of the different matrices.
+*Time taken*: 4.1 seconds
+
+2. Loop unrolling to create 16 lines of operations in the innermost loop.
+This will reduce the nuber of condition checks done.
+*Time taken:* 2.3 seconds
+
+```c
+    for (int i = 0; i < q; ++i) {
+        for (int j = 0; j < r; ++j) {
+            T->matrix[j][i] = b->matrix[i][j];
+        }		
+    }
+```
+
+3. Pre increment over post increment
+Pre-increment is faster than post-increment because post increment keeps a copy of previous (existing) value and adds 1 in the existing value while pre-increment is simply adds 1 without keeping the existing value.
+*Time taken:* 2.1 seconds
+
+```c
+    ++i; // Preffered
+    i++; // Slower
+```
 
 
+4. Pointer accesing to memory
+Restricted pointer access instead of array look-ups.
+*Time taken:* 1.8 seconds
+
+```c
+    *(A + i); // Preffered
+    A[i];     // Slower on some compilers
+```
+
+
+5. Storing in 1D array
+The best optimisation in terms of time, as now only 1D arrays are used instead of 2D referencing which is most time consuming.
+*Time taken:* 1.357636 seconds
+
+```c
+// In the i loop
+A = *(a->matrix + i);
+C = *(result->matrix + i);
+
+// In the j loop
+B = *(t->matrix + j);
+
+// Now accesed is the k loop as:
+*(A + k) * *(B + k)
+```
+
+6. Temporary variable 
+In order to reduce repeated acces to array variables a temporary variable is used and then assigned to the array once upon completion of the loop.
+*Time taken: 1.348360 seconds*
+
+
+```c
+    *(C + j) = temporary;
+```
+
+### Perf
+![Perf](Images/Perf.png)<br>
+
+### Gprof
+![Gpof](Images/Gprof.png)
+
+### clock_gettime
+![Gettime](Images/Gettime.png)
+
+### Cachegrind
+![Cache](Images/Cachegrind.png)
 
