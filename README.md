@@ -338,3 +338,102 @@ In order to reduce repeated acces to array variables a temporary variable is use
 ### Cachegrind
 ![Cache](Images/Cachegrind.png)
 
+
+## Task 2
+
+## Optimisations Used
+
+*Time taken with no optimisation*: 2.15 seconds 
+
+1. Iterative merge sort:
+Avoids the excessive recursive function calls and thus the overheads are avoided.
+*Time taken*: 1.7 seconds
+
+2. Bit hacks
+No branch minimum computation is done via bithacks. 
+This ensures that the incorrect branch is not taken and saves the processors time of flushing the pipeline of incorrect instructions.
+*Time taken:* 1.9 seconds
+
+```c
+arr[k] = b[j] ^ ((a[i] ^ b[j]) & -comp);
+```
+
+3. Pre increment over post increment
+Pre-increment is faster than post-increment because post increment keeps a copy of previous (existing) value and adds 1 in the existing value while pre-increment is simply adds 1 without keeping the existing value.
+*Time taken:* 2.1 seconds
+
+```c
+    ++i; // Preffered
+    i++; // Slower
+```
+
+
+4. Pointer Accessing:
+Restricted pointer access instead of array look-ups.
+*Time taken:* 1.8 seconds
+
+```c
+while (i < n1)
+{
+    // arr[k] = a[i];
+    *(arr + k) = *(a + i);
+    ++i;
+    ++k;
+}
+```
+
+
+5. Using insertion sort: 
+For chunks of the array of a small size (in this case 32)
+*Time taken:* 1.67 seconds
+
+```c
+for (int i = 0; i < n; i += RUN)
+{
+    int left = i;
+
+    // int right = (i+31)^((i+31)^(n-1)&-((i+31)<=(n-1)));
+    int right= (i+31)<(n-1)?(i+31):(n-1);
+
+    for (int i = left + 1; i <= right; i++)
+    {
+        int temp = *(arr+i);
+        int j = i - 1;
+        while (*(arr+j) > temp && j >= left)
+        {
+            *(arr+j + 1) = *(arr+j);
+            j--;
+        }
+        *(arr+j + 1) = temp;
+    }
+}
+```
+
+6. Inline functions 
+All functions are written within the same merge_sort function itself to avoid function call overheads.
+*Time taken: 1.53 seconds*
+
+7. memcpy():
+In order to copy the subarrays and sort them individually, the memcpy function has been used to optimize the run time.
+
+```c
+memcpy(a, &arr[l],sizeof(int)*n1);
+memcpy(b, &arr[m+1],sizeof(int)*n2);
+```
+
+
+### Perf
+![Perf](Images/perf2.png)<br>
+
+### Gprof
+![Gpof](Images/gprof1.png)
+
+### clock_gettime
+![Gettime](Images/gettime.png)
+
+### Cachegrind
+![Cache](Images/Cachegrind2.png)
+
+
+
+
