@@ -12,12 +12,11 @@
 #define RUN 32
 
 //TODO: Bit hacks used for min of two elements
-static inline int min(int x, int y) { return y ^ ((x ^ y) & -(x <= y)); }
+static inline int min(int x, int y) { return (y) ^ (((x) ^ (y)) & -((x) <= (y))); }
 
 static inline int *merge_sort(int *arr, int n)
 {
-    register int * restrict ret;
-    ret = malloc(sizeof(int) * n);
+    register int * restrict ret = malloc(sizeof(int) * n);
 
     /*
 	Maximum value of n can be 10^6.
@@ -27,20 +26,22 @@ static inline int *merge_sort(int *arr, int n)
 	
 	Also note you can write any other function that you might need.
 	*/
+    register int temp;
+    register int j;
 
-    for (register int i = 0; i < n; i += RUN)
+    for (register int i = 0; i < n; i += 32)
     {
         register int left = i;
         register int right= (i+31)<(n-1)?(i+31):(n-1);
 
-        for (register int i = left + 1; i <= right; i++)
+        for (register int i = left + 1; i <= right; ++i)
         {
-            register int temp = *(arr+i);
-            register int j = i - 1;
+            temp = *(arr+i);
+            j = i - 1;
             while (*(arr+j) > temp && j >= left)
             {
                 *(arr+j + 1) = *(arr+j);
-                j--;
+                --j;
             }
             *(arr+j + 1) = temp;
         }
@@ -48,7 +49,7 @@ static inline int *merge_sort(int *arr, int n)
     
     register int curr_size;
     register int left_start;
-    for (curr_size = RUN; curr_size <= n - 1; curr_size = 2 * curr_size)
+    for (curr_size = 32; curr_size <= n - 1; curr_size = 2 * curr_size)
     {
         for (left_start = 0; left_start <n; left_start += 2 * curr_size)
         {
