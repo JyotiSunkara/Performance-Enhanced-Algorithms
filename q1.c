@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define MAXSIZE 1000
-#define BILLION  1000000000L
+#define BILLION  100000000L
 
 
 typedef struct Matrix {
@@ -14,11 +14,9 @@ Matrix * restrict result;
 Matrix * restrict t;
 
 	
-int * restrict A;
-int * restrict B;
-int * restrict C;
+
   
-Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, int p, int q, int r) {
+Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, register int p, register int q, register int r) {
 
 
 	/*
@@ -32,47 +30,34 @@ Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, int p, int q, 
 
 	Also note you can write any other function that you might need.
 	*/ 
+	register int * restrict A;
+	register int * restrict B;
+	register int * restrict C;
 
     result = malloc(sizeof(Matrix));
-    t = malloc(sizeof(Matrix));
 
-    for (int i = 0; i < p; ++i) {
-		for (int j = 0; j < r; ++j) {
-			result->matrix[i][j] = 0;
-		}
-	}
+	register int max = q ^ ((q ^ r) & -(q < r));
     //Transpose
-	for (int i = 0; i < q; ++i) {
-		for (int j = 0; j < r; ++j) {
-			t->matrix[j][i] = b->matrix[i][j];
+	for (register int i = 0; i < max; ++i) {
+		for (register int j = 0; j < i; ++j) {
+			b->matrix[i][j] =  b->matrix[i][j] ^ b->matrix[j][i];
+            b->matrix[j][i] =  b->matrix[i][j] ^ b->matrix[j][i];
+            b->matrix[i][j] =  b->matrix[i][j] ^ b->matrix[j][i];
 		}		
 	}
-    
-	for (int i = 0; i < p; ++i)	{
+register int temporary; 
+register int k;
+
+	for (register int i = 0; i < p; ++i)	{
         A = *(a->matrix + i);
         C = *(result->matrix + i);
-		for (int j = 0; j < r; ++j) {
-            B = *(t->matrix + j);				
-			int temporary = 0;
-            int k = 0;
+		for (register int j = 0; j < r; ++j) {
+            B = *(b->matrix + j);				
+			temporary = 0;
+            k = 0;
 			for ( ; k < q - 16; k += 16) {
-				temporary += *(A + k) * *(B + k);
-				temporary += *(A + k+1) * *(B + k+1);
-				temporary += *(A + k+2) * *(B + k+2);
-				temporary += *(A + k+3) * *(B + k+3);
-				temporary += *(A + k+4) * *(B + k+4);
-				temporary += *(A + k+5) * *(B + k+5);
-				temporary += *(A + k+6) * *(B + k+6);
-				temporary += *(A + k+7) * *(B + k+7);
-				temporary += *(A + k+8) * *(B + k+8);
-				temporary += *(A + k+9) * *(B + k+9);
-                temporary += *(A + k+10) * *(B + k+10);
-				temporary += *(A + k+11) * *(B + k+11);
-				temporary += *(A + k+12) * *(B + k+12);
-				temporary += *(A + k+13) * *(B + k+13);
-				temporary += *(A + k+14) * *(B + k+14);
-                temporary += *(A + k+15) * *(B + k+15);
-            }
+				temporary += *(A + k) * *(B + k) + *(A + k+1) * *(B + k+1) + *(A + k+2) * *(B + k+2)+ *(A + k+3) * *(B + k+3) + *(A + k+4) * *(B + k+4) + *(A + k+5) * *(B + k+5) + *(A + k+6) * *(B + k+6) + *(A + k+7) * *(B + k+7) + *(A + k+8) * *(B + k+8) + *(A + k+9) * *(B + k+9) + *(A + k+10) * *(B + k+10) + *(A + k+11) * *(B + k+11) + *(A + k+12) * *(B + k+12) + *(A + k+13) * *(B + k+13) + *(A + k+14) * *(B + k+14) + *(A + k+15) * *(B + k+15);
+			}
 
             for ( ; k < q; ++k) {
 				temporary += *(A + k) * *(B + k);
@@ -122,7 +107,7 @@ void test_multilpy(Matrix *a, Matrix *b, int p, int q, int r, Matrix *R) {
 		for (int j = 0; j < r; ++j) {
             int temporary = 0;
 			for (int k = 0; k < q; ++k) {
-				temporary += a->matrix[i][k]*b->matrix[k][j];
+				temporary += a->matrix[i][k]*b->matrix[j][k];
             }
 
 
@@ -147,8 +132,8 @@ int main() {
 	// printMatrix(A, p, q);
 	// printMatrix(B, q, r);
      
-	randMatrix(A, MAXSIZE, MAXSIZE);
-	randMatrix(B, MAXSIZE, MAXSIZE);
+	randMatrix(A, 1000, 1000);
+	randMatrix(B, 1000, 1000);
 	
 	if( clock_gettime( CLOCK_REALTIME, &start) == -1 ) {
       perror( "clock gettime" );
@@ -167,7 +152,7 @@ int main() {
 
 	printf("Time: %lf\n", S + NS);
 	// printMatrix(R, p, r);
-    test_multilpy(A, B, 1000,1000,1000, R);
+    test_multilpy(A, B, 1000, 1000, 1000, R);
 
 	return 0;
 }
