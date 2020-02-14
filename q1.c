@@ -2,12 +2,12 @@
 #include<stdlib.h>
 #include <time.h>
 
-#define MAXSIZE 1000
+#define MAXSIZE 5000
 #define BILLION  1000000000L
 
 
 typedef struct Matrix {
-	int matrix[1000][1000];
+	int matrix[5000][5000];
 } Matrix;
 
 Matrix * restrict result;
@@ -22,7 +22,7 @@ Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, register int p
 	/*
 	size of matrix a is pxq
 	size of matrix b is qxr
-	Maximum value of p,q or r can be 1000.
+	Maximum value of p,q or r can be 5000.
 	Your Code goes here. The output of their matrix multiplication
 	should be stored in result and returned. Just code this function,
 	no need to write anything in main(). This function will be called directly.
@@ -132,15 +132,15 @@ int main() {
 	// printMatrix(A, p, q);
 	// printMatrix(B, q, r);
      
-	randMatrix(A, 1000, 1000);
-	randMatrix(B, 1000, 1000);
+	randMatrix(A, 5000, 5000);
+	randMatrix(B, 5000, 5000);
 	
 	if( clock_gettime( CLOCK_REALTIME, &start) == -1 ) {
       perror( "clock gettime" );
       return EXIT_FAILURE;
     }
 
-	Matrix * restrict R = matrix_multiply(A, B, 1000, 1000, 1000);
+	Matrix * restrict R = matrix_multiply(A, B, 5000, 5000, 5000);
 	
 	if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) {
       perror( "clock gettime" );
@@ -152,7 +152,7 @@ int main() {
 
 	printf("Time: %lf\n", S + NS);
 	// printMatrix(R, p, r);
-    test_multilpy(A, B, 1000, 1000, 1000, R);
+    // test_multilpy(A, B, 5000, 5000, 5000, R);
 
 	return 0;
 }

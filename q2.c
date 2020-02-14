@@ -16,7 +16,7 @@ static inline int min(int x, int y) { return y ^ ((x ^ y) & -(x <= y)); }
 
 static inline int *merge_sort(int *arr, int n)
 {
-    int * restrict ret;
+    register int * restrict ret;
     ret = malloc(sizeof(int) * n);
 
     /*
@@ -28,15 +28,15 @@ static inline int *merge_sort(int *arr, int n)
 	Also note you can write any other function that you might need.
 	*/
 
-    for (int i = 0; i < n; i += RUN)
+    for (register int i = 0; i < n; i += RUN)
     {
-        int left = i;
-        int right= (i+31)<(n-1)?(i+31):(n-1);
+        register int left = i;
+        register int right= (i+31)<(n-1)?(i+31):(n-1);
 
-        for (int i = left + 1; i <= right; i++)
+        for (register int i = left + 1; i <= right; i++)
         {
-            int temp = *(arr+i);
-            int j = i - 1;
+            register int temp = *(arr+i);
+            register int j = i - 1;
             while (*(arr+j) > temp && j >= left)
             {
                 *(arr+j + 1) = *(arr+j);
@@ -46,26 +46,26 @@ static inline int *merge_sort(int *arr, int n)
         }
     }    
     
-    int curr_size;
-    int left_start;
+    register int curr_size;
+    register int left_start;
     for (curr_size = RUN; curr_size <= n - 1; curr_size = 2 * curr_size)
     {
         for (left_start = 0; left_start <n; left_start += 2 * curr_size)
         {
-            int mid = min(left_start + curr_size - 1, n - 1);
+            register int mid = min(left_start + curr_size - 1, n - 1);
             
-            int right_end = min(left_start + 2 * curr_size - 1, n - 1);
+            register int right_end = min(left_start + 2 * curr_size - 1, n - 1);
 
             // merge(arr, left_start, mid, right_end);
             //TODO: Including inline functions to prevent branching
-            int i, j, k;
-            int l = left_start, r = right_end, m = mid;
-            int n1 = m - l + 1;
-            int n2 = r - m;
+            register int i, j, k;
+            register int l = left_start, r = right_end, m = mid;
+            register int n1 = m - l + 1;
+            register int n2 = r - m;
 
-            // int a[n1], b[n2];
-            int * restrict a=malloc(sizeof(int)*n1);
-            int *restrict b=malloc(sizeof(int)*n2);
+            // register int a[n1], b[n2];
+            register int * restrict a=malloc(sizeof(int)*n1);
+            register int *restrict b=malloc(sizeof(int)*n2);
 
             memcpy(a, &arr[l],sizeof(int)*n1);
             memcpy(b, &arr[m+1],sizeof(int)*n2);
@@ -75,7 +75,7 @@ static inline int *merge_sort(int *arr, int n)
             while (i < n1 && j < n2)
             {
                 //TODO: Change2: Rewriting the method to calculate the minimum
-                int comp = (a[i] <= b[j]);
+                register int comp = (a[i] <= b[j]);
                 arr[k] = b[j] ^ ((a[i] ^ b[j]) & -comp);
                 i += comp;
                 j += !comp;
@@ -99,7 +99,7 @@ static inline int *merge_sort(int *arr, int n)
             }
         }
     }
-    for (int i = 0; i < n; i++)
+    for (register int i = 0; i < n; i++)
     {
         // ret[i] = arr[i];
         *(ret +  i) = *(arr + i);
@@ -108,9 +108,9 @@ static inline int *merge_sort(int *arr, int n)
     return ret;
 }
 
-void show(int a[], int n)
+void show(register int a[], register int n)
 {
-    for (int i = 0; i < n; i++)
+    for (register int i = 0; i < n; i++)
         printf("%d \n", a[i]);
     printf("\n");
 }
@@ -118,14 +118,14 @@ void show(int a[], int n)
 int main()
 {
     srand(time(0));
-    int iter = 1, n = 1000000, chk=0;
-    int * restrict arr = (int *)malloc(n * sizeof(int));
-    int * restrict r = (int *)malloc(n * sizeof(int));
+    register int iter = 1, n = 100000000, chk=0;
+    register int * restrict arr = (int *)malloc(n * sizeof(int));
+    register int* restrict r = (int *)malloc(n * sizeof(int));
     double sum = 0;
     struct timespec start, stop;
-    for (int x = 0; x < iter; x++)
+    for (register int x = 0; x < iter; x++)
     {
-        for (long int i = 0; i < n; i++)
+        for (long register int i = 0; i < n; i++)
         {
             // *(arr+i) = rand() % 100000;
             *(arr+i)=n-i;
@@ -145,11 +145,11 @@ int main()
         }
         // show(r, n);
 
-        double S = (stop.tv_sec - start.tv_sec);
-        double NS = (double)(stop.tv_nsec - start.tv_nsec) / (double)BILLION;
+        register double S = (stop.tv_sec - start.tv_sec);
+        register double NS = (double)(stop.tv_nsec - start.tv_nsec) / (double)BILLION;
 
-        double final = S + NS;
-        for(int i=1; i<n; i++)
+        register double final = S + NS;
+        for(register int i=1; i<n; i++)
         {
             if(r[i]<r[i-1])
             {
