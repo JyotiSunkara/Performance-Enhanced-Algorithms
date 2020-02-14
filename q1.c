@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define MAXSIZE 1000
-#define BILLION  100000000L
+#define BILLION  1000000000L
 
 
 typedef struct Matrix {
