@@ -33,9 +33,7 @@ Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, register int p
 	register int * restrict A;
 	register int * restrict B;
 	register int * restrict C;
-
     result = malloc(sizeof(Matrix));
-
 	register int max = q ^ ((q ^ r) & -(q < r));
 	register int i, j, temporary, k;
     //Transpose
@@ -67,16 +65,6 @@ Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, register int p
 	return result;
 }
 
-void printMatrix(Matrix *R, int m, int n) {
-
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
-			/* code */
-			printf("%d ", R->matrix[i][j]);
-		}
-		printf("\n");
-	}
-}
 
 void readMatrix(Matrix *R, int m, int n) {
 

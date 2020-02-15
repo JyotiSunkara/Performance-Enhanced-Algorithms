@@ -96,7 +96,6 @@ static inline int *merge_sort(int *arr, int n)
                 // ++j;
                 // ++k;
             }
-
             free(a);
             free(b);
         }
