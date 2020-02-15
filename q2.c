@@ -47,26 +47,27 @@ static inline int *merge_sort(int *arr, int n)
         }
     }    
     
-    register int curr_size;
-    register int left_start;
+    register int curr_size, left_start, mid, right_end, i, k, l, r, m, n1, n2, comp;
+   
     for (curr_size = 32; curr_size <= n - 1; curr_size = 2 * curr_size)
     {
         for (left_start = 0; left_start <n; left_start += 2 * curr_size)
         {
-            register int mid = min(left_start + curr_size - 1, n - 1);
+            mid = min(left_start + curr_size - 1, n - 1);
             
-            register int right_end = min(left_start + 2 * curr_size - 1, n - 1);
+            right_end = min(left_start + 2 * curr_size - 1, n - 1);
 
             // merge(arr, left_start, mid, right_end);
             //TODO: Including inline functions to prevent branching
-            register int i, j, k;
-            register int l = left_start, r = right_end, m = mid;
-            register int n1 = m - l + 1;
-            register int n2 = r - m;
+            l = left_start;
+            r = right_end;
+            m = mid;
+            n1 = m - l + 1;
+            n2 = r - m;
 
             // register int a[n1], b[n2];
-            register int * restrict a=malloc(sizeof(int)*n1);
-            register int *restrict b=malloc(sizeof(int)*n2);
+            register int * restrict a = malloc(sizeof(int)*n1);
+            register int *restrict b = malloc(sizeof(int)*n2);
 
             memcpy(a, &arr[l],sizeof(int)*n1);
             memcpy(b, &arr[m+1],sizeof(int)*n2);
@@ -76,31 +77,31 @@ static inline int *merge_sort(int *arr, int n)
             while (i < n1 && j < n2)
             {
                 //TODO: Change2: Rewriting the method to calculate the minimum
-                register int comp = (a[i] <= b[j]);
-                arr[k] = b[j] ^ ((a[i] ^ b[j]) & -comp);
+                comp = (a[i] <= b[j]);
+                arr[k++] = b[j] ^ ((a[i] ^ b[j]) & -comp);
                 i += comp;
                 j += !comp;
-                ++k;
             }
 
             while (i < n1)
             {
                 // arr[k] = a[i];
-                *(arr + k) = *(a + i);
-                ++i;
-                ++k;
+                *(arr + k++) = *(a + i++);
             }
 
             while (j < n2)
             {
                 // arr[k] = b[j];
-                *(arr + k) = *(b + j);
-                ++j;
-                ++k;
+                *(arr + k++) = *(b + j++);
+                // ++j;
+                // ++k;
             }
+
             free(a);
             free(b);
         }
+
+        
     }
     for (register int i = 0; i < n; i++)
     {
@@ -146,7 +147,7 @@ int main()
             perror("clock gettime");
             return EXIT_FAILURE;
         }
-        show(r, n);
+        // show(r, n);
 
         register double S = (stop.tv_sec - start.tv_sec);
         register double NS = (double)(stop.tv_nsec - start.tv_nsec) / (double)BILLION;

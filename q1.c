@@ -37,21 +37,20 @@ Matrix *matrix_multiply(Matrix * restrict a, Matrix * restrict b, register int p
     result = malloc(sizeof(Matrix));
 
 	register int max = q ^ ((q ^ r) & -(q < r));
+	register int i, j, temporary, k;
     //Transpose
-	for (register int i = 0; i < max; ++i) {
-		for (register int j = 0; j < i; ++j) {
+	for (i = 0; i < max; ++i) {
+		for (j = 0; j < i; ++j) {
 			b->matrix[i][j] =  b->matrix[i][j] ^ b->matrix[j][i];
             b->matrix[j][i] =  b->matrix[i][j] ^ b->matrix[j][i];
             b->matrix[i][j] =  b->matrix[i][j] ^ b->matrix[j][i];
 		}		
 	}
-register int temporary; 
-register int k;
 
-	for (register int i = 0; i < p; ++i)	{
+	for (i = 0; i < p; ++i)	{
         A = *(a->matrix + i);
         C = *(result->matrix + i);
-		for (register int j = 0; j < r; ++j) {
+		for (j = 0; j < r; ++j) {
             B = *(b->matrix + j);				
 			temporary = 0;
             k = 0;
