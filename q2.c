@@ -98,6 +98,8 @@ static inline int *merge_sort(int *arr, int n)
                 ++j;
                 ++k;
             }
+            free(a);
+            free(b);
         }
     }
     for (register int i = 0; i < n; i++)
@@ -144,7 +146,7 @@ int main()
             perror("clock gettime");
             return EXIT_FAILURE;
         }
-        // show(r, n);
+        show(r, n);
 
         register double S = (stop.tv_sec - start.tv_sec);
         register double NS = (double)(stop.tv_nsec - start.tv_nsec) / (double)BILLION;
